@@ -1,10 +1,21 @@
 <html>
   <head>
+  
     <!-- A real extension would not be able to link to external CDNs; we just do it here for simplicity -->
     <script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
-    <!-- We load and initialize the Muxy SDK in the same way as on the panel. -->
+  
+    <!--
+      Twitch only allows loading assets from certain white-listed domains. Above we reference a font
+      from Google's font CDN. Here we load the latest version of Muxy's JavaScript SDK. You can
+      reference specific versions by replacing `latest` with a version number (e.g. `2.0.0`), or keep
+      this as-is to automatically load the most recent version.
+    -->
     <script src="//ext-cdn.muxy.io/muxy-extensions-js/latest/muxy-extensions-js.js"></script>
 
+    <!--
+      Here is the entire code block needed to power the panel. It uses Muxy's state loading to get
+      the last sent message, and easy event binding to get notified when a new message is sent.
+    -->
     <script type="text/javascript">
       /*
       * Here we are giving the SDK a hint that this will run on the broadcaster's dashboard and
@@ -22,7 +33,7 @@
       var firstFetchTime;
 
       /* 
-      * Here, we are using lodash to throttles calls to this function so if it is called more than once in a short period of 
+      * Here we are using lodash to throttles calls to this function, so if it is called more than once in a short period of 
       * time, only one instance will be called.
       */
       const updateCount = _.debounce(function () {
