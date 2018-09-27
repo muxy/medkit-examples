@@ -2,16 +2,29 @@
   <head>
     <!-- A real extension would not be able to link to external CDNs; we just do it here for simplicity -->
     <script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
-    <script src="//ext-cdn.muxy.io/muxy-extensions-js/latest/muxy-extensions.js"></script>
+    <!-- We load and initialize the Muxy SDK in the same way as on the panel. -->
+    <script src="//ext-cdn.muxy.io/muxy-extensions-js/latest/muxy-extensions-js.js"></script>
 
     <script type="text/javascript">
-      Muxy.testJWTRole = 'broadcaster'; // Necessary here to fake broadcaster access to the Muxy API. In production, the role will be set automatically in the broadcaster views.
+      /*
+      * Here we are giving the SDK a hint that this will run on the broadcaster's dashboard and
+      * have the same rights a broadcaster does. This is only needed and used when developing an
+      * have the same rights a broadcaster does. This is only needed and used when developing an
+      * extension. Once it is deployed to production, the backend will use the correct rights from
+      * the extension system. You can leave this line in and it will not adversely affect the
+      * final extension.
+      */
+      Muxy.testJWTRole = 'broadcaster';
 
-      Muxy.setup({ extensionID: '1ssqhiy6xaoyisxbtvkiusxtjzkof2' });
+      Muxy.setup({ clientID: 'replaceme' });
       const sdk = new Muxy.SDK();
 
       var firstFetchTime;
 
+      /* 
+      * Here, we are using lodash to throttles calls to this function so if it is called more than once in a short period of 
+      * time, only one instance will be called.
+      */
       const updateCount = _.debounce(function () {
         // We'll be counting the number of accumulations since the initial fetch
         if (!firstFetchTime) {
@@ -19,15 +32,23 @@
           document.querySelector('#fetchTime').innerText = firstFetchTime;
         }
 
-        sdk.getAccumulation('simple_counter', firstFetchTime.getTime()).then(function (results) {
-          const counter = document.querySelector('#counter');
+        /*
+         * This broadcaster-only function fetches the accumulated user data for a given id received by the backend since the passed start.
+         */
+        sdk.getAccumulateData('simple_counter', firstFetchTime.getTime())
+          .then(function (results) {
+            const counter = document.querySelector('#counter');
 
-          // The number of objects in the result data is our counter value
-          counter.innerText = results.data.length;
-        });
+            /*
+             * The number of objects in the result data is our counter value
+             */
+            counter.innerText = results.data.length;
+          });
       }, 1000);
 
-      // Retrieve accumulated data on an interval
+      /*
+       * Retrieve accumulated data on an interval
+       */
       setInterval(updateCount, 2000);
     </script>
   </head>
