@@ -1,58 +1,84 @@
 <html>
-<head>
-  <style>
-    @import url('//fonts.googleapis.com/css?family=Roboto');
+  <head>
+    <style>
+      @import url('//fonts.googleapis.com/css?family=Roboto');
 
-    body {
-      font-family: 'Roboto', sans-serif;
-    }
+      body {
+        font-family: 'Roboto', sans-serif;
+      }
 
-    .background {
-      background-color: #9da6a8;
-      position: relative;
-    }
+      .background {
+        background-color: #9da6a8;
+        position: relative;
+      }
 
-    .foreground {
-      background-color: #2595f3;
-      display: flex;
-      justify-content: center;
-      height: 5px;
-      transition: width 0.5s;
-      width: 0%;
-    }
-  </style>
-  <!-- A real extension would not be able to link to external CDNs; we just do it here for simplicity -->
-  <script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
-  <script src="//ext-cdn.muxy.io/muxy-extensions-js/latest/muxy-extensions.js"></script>
-</head>
+      .foreground {
+        background-color: #2595f3;
+        display: flex;
+        justify-content: center;
+        height: 5px;
+        transition: width 0.5s;
+        width: 0%;
+      }
+    </style>
 
-<body>
-  CPU
-  <div class="background">
-    <div id="CPU" class="foreground"></div>
-  </div>
+    <script type="text/javascript">
+      /*
+        * All Muxy-powered extensions begin by initializing the SDK. This is done by simply calling
+        * `setup()` on the global Muxy object with your extension's Client ID, and then creating an
+        * SDK object.
+        */
+        Muxy.setup({ clientID: 'replaceme' });
+        const sdk = new Muxy.SDK();
 
-  RAM
-  <div class="background">
-    <div id="RAM" class="foreground"></div>
-  </div>
+        /*
+        * The new SDK object has a `loaded` function that returns a Promise which will resolve once
+        * communication with the backend has been established. It will fail with an error if
+        * something goes wrong.
+        */
+        sdk.loaded().then(() => {
+          /*
+          * First we will ask the SDK to load all extension state from the backend. This function
+          * returns a Promise that will resolve with an object containing several fields representing
+          * state for everything from the extension as a whole, to the broadcaster-set channel state,
+          * even down to state stored for the specific viewer.
+          */
+          sdk.getAllState().then(function (state) {
+            /*
+            * The `channel` field of the `state` object will contain data set by the broadcaster.
+            */
+            document.querySelector('#CPU').style.width = `${state.channel.CPU}%` || '0%';
+            document.querySelector('#RAM').style.width = `${state.channel.RAM}%` || '0%';
+          }).catch(function (err) {
+            console.error(err);
+          });
 
-  <script type="text/javascript">
-    /* global Muxy */
-    const cpuEl = document.getElementById('CPU');
-    const ramEl = document.getElementById('RAM');
+          /*
+          * Next we will set up an event listener on the SDK that will listen for a named event
+          * coming to the extension.
+          */
+          sdk.listen('json_store_update:hardware_stats', (data) => {
+            // Timeout allows for viewer latency to synchronize stats and video
+            setTimeout(() => { 
+              document.querySelector('#CPU').style.width = `${data.value.CPU}%`;
+              document.querySelector('#RAM').style.width = `${data.value.RAM}%`;
+            }, (sdk.user.latency || 0) * 1000);
+          }).catch(function (err) {
+            console.error(err);
+          });
+        });
+    </script>
+  </head>
 
-    Muxy.setup({extensionID: '1ssqhiy6xaoyisxbtvkiusxtjzkof2'});
-    const sdk = new Muxy.SDK();
+  <body>
+    CPU
+    <div class="background">
+      <div id="CPU" class="foreground"></div>
+    </div>
 
-    sdk.loaded().then(() => {
-      sdk.listen('json_store_update:hardware_stats', (data) => {
-        setTimeout(() => { // Timeout allows for viewer latency to synchronize stats and video
-          cpuEl.style.width = data.value.CPU + '%';
-          ramEl.style.width = data.value.RAM + '%';
-        }, (sdk.user.latency || 0) * 1000);
-      });
-    });
-  </script>
-</body>
+    RAM
+    <div class="background">
+      <div id="RAM" class="foreground"></div>
+    </div>
+  </body>
 </html>

@@ -1,48 +1,58 @@
 <html>
-<head>
-  <style>
-    @import url('//fonts.googleapis.com/css?family=Roboto');
+  <head>
+    <style>
+      @import url('//fonts.googleapis.com/css?family=Roboto');
 
-    body {
-      font-family: 'Roboto', sans-serif;
-    }
+      body {
+        font-family: 'Roboto', sans-serif;
+      }
 
-  </style>
-  <!-- A real extension would not be able to link to external CDNs; we just do it here for simplicity -->
-  <script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
-  <script src="//ext-cdn.muxy.io/muxy-extensions-js/latest/muxy-extensions.js"></script>
-</head>
+    </style>
+    <script type="text/javascript">
+      /*
+      * For testing, we explicitly set the role to broadcaster.
+      */
+      Muxy.testJWTRole = 'broadcaster';
 
-<body>
+      /*
+      * All Muxy-powered extensions begin by initializing the SDK. This is done by simply calling
+      * `setup()` on the global Muxy object with your extension's Client ID, and then creating an
+      * SDK object.
+      */
+      Muxy.setup({ clientID: 'replaceme' });
+      const sdk = new Muxy.SDK();
+
+      
+
+      /*
+      * Here we attach an event listener for the click of the button that validates the user input broadcaster 
+      * PIN (here called "Auth Code") with Muxy's Two-Factor auth system and displays the appropriate message 
+      * to the user based on the validation response.
+      */
+      document.querySelector('#validate').addEventListener('click', () => {
+        const codeEl = document.querySelector('#code');
+        const statusEl = document.querySelector('#status');
+        
+        sdk.validateCode(codeEl.value)
+          .then(() => {
+            statusEl.innerHTML = 'Token successfully validated';
+          })
+          .catch(() => {
+            statusEl.innerHTML = 'Token could not be validated, please try again.';
+          });
+      });
+    </script>
+  </head>
+
+  <body>
     <label>
       Auth Code
-      <br/>
+      <br />
       <input id="code" type="text">
     </label>
-    <br/>
-    <input id="validate" type="button" value="Validate">
-    <br/>
+    <br />
+    <button id="validate">Validate</button>
+    <br />
     <span id="status"></span>
   </body>
-
-  <script type="text/javascript">
-    /* global Muxy */
-
-    Muxy.testJWTRole = 'broadcaster';
-
-    Muxy.setup({ extensionID: '1ssqhiy6xaoyisxbtvkiusxtjzkof2' });
-    const sdk = new Muxy.SDK();
-
-    document.getElementById('validate').addEventListener('click', () => {
-      const codeEl = document.getElementById('code');
-      const statusEl = document.getElementById('status');
-      sdk.validateCode(codeEl.value)
-        .then(() => {
-          statusEl.innerHTML = 'Token successfully validated';
-        })
-        .catch(() => {
-          statusEl.innerHTML = 'Token could not be validated, please try again.';
-        });
-    });
-  </script>
 </html>
