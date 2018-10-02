@@ -1,9 +1,9 @@
 <html>
   <head>
-  
+
     <!-- A real extension would not be able to link to external CDNs; we just do it here for simplicity -->
     <script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
-  
+
     <!--
       Twitch only allows loading assets from certain white-listed domains. Above we reference a font
       from Google's font CDN. Here we load the latest version of Muxy's JavaScript SDK. You can
@@ -20,7 +20,6 @@
       /*
       * Here we are giving the SDK a hint that this will run on the broadcaster's dashboard and
       * have the same rights a broadcaster does. This is only needed and used when developing an
-      * have the same rights a broadcaster does. This is only needed and used when developing an
       * extension. Once it is deployed to production, the backend will use the correct rights from
       * the extension system. You can leave this line in and it will not adversely affect the
       * final extension.
@@ -32,8 +31,8 @@
 
       var firstFetchTime;
 
-      /* 
-      * Here we are using lodash to throttles calls to this function, so if it is called more than once in a short period of 
+      /*
+      * Here we are using lodash to throttles calls to this function, so if it is called more than once in a short period of
       * time, only one instance will be called.
       */
       const updateCount = _.debounce(function () {

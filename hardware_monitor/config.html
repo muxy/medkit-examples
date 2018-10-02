@@ -12,7 +12,6 @@
       /*
       * Here we are giving the SDK a hint that this will run on the broadcaster's dashboard and
       * have the same rights a broadcaster does. This is only needed and used when developing an
-      * have the same rights a broadcaster does. This is only needed and used when developing an
       * extension. Once it is deployed to production, the backend will use the correct rights from
       * the extension system. You can leave this line in and it will not adversely affect the
       * final extension.
@@ -27,17 +26,17 @@
       Muxy.setup({ clientID: 'replaceme' });
       const sdk = new Muxy.SDK();
 
-      
+
 
       /*
-      * Here we attach an event listener for the click of the button that validates the user input broadcaster 
-      * PIN (here called "Auth Code") with Muxy's Two-Factor auth system and displays the appropriate message 
+      * Here we attach an event listener for the click of the button that validates the user input broadcaster
+      * PIN (here called "Auth Code") with Muxy's Two-Factor auth system and displays the appropriate message
       * to the user based on the validation response.
       */
       document.querySelector('#validate').addEventListener('click', () => {
         const codeEl = document.querySelector('#code');
         const statusEl = document.querySelector('#status');
-        
+
         sdk.validateCode(codeEl.value)
           .then(() => {
             statusEl.innerHTML = 'Token successfully validated';
