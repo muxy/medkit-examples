@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const rp = require('request-promise');
 const readline = require('readline');
 const os = require('os');
@@ -35,14 +37,14 @@ const getToken = ()=> {
     method: 'POST',
     uri: 'https://sandbox.api.muxy.io/v1/e/unauthed/pin',
     body: {
-      identifier: 'hardware_monitor'
+      identifier: process.env.EXTENSION_ID
     },
     json: true
   })
   .then((data) => {
     token = data.token;
     pin = data.pin;
-    
+
     startCheckingForPin();
 
     console.log('To connect to your extension please enter this pin in the config page:');
@@ -61,7 +63,7 @@ const checkJWT = ()=> {
     method: 'POST',
     uri: 'https://sandbox.api.muxy.io/v1/e/unauthed/validate_pin',
     body: {
-      identifier: 'hardware_monitor',
+      identifier: process.env.EXTENSION_ID,
       jwt: token
     },
     json: true
@@ -82,7 +84,7 @@ const postLoadInfo = (info) => {
     method: 'POST',
     uri: 'https://sandbox.api.muxy.io/v1/e/json_store?id=default',
     headers: {
-      Authorization: `hardware_monitor ${token}`
+      Authorization: `${process.env.EXTENSION_ID} ${token}`
     },
     body: info,
     json: true
