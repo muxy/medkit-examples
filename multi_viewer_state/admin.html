@@ -1,0 +1,178 @@
+<!doctype html>
+<html>
+  <!--
+    This is the admin-only extension. Only privileged users will be able to access this page and set
+    state for multiple viewers.
+
+    For development this can be run with a local server (e.g. https://www.npmjs.com/package/serve),
+    and then set as the Admin Panel for the extension at https://dev.muxy.io
+  -->
+  <head>
+    <title>Admin Controller</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+    <!--
+      Reference the latest version of the MEDKit SDK.
+    -->
+    <script src="//ext-cdn.muxy.io/medkit/latest/medkit.umd.js"></script>
+
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+      }
+
+      hr {
+        width: 100%;
+      }
+
+      input, textarea, button {
+        display: block;
+        margin: 5px 0;
+      }
+
+      textarea.error { border: 1px solid #990000; background-color: rgba(200, 0, 0, 0.1); }
+      textarea.success { border: 1px solid #009900; background-color: rgba(0, 200, 0, 0.1); }
+    </style>
+  </head>
+
+  <body>
+    <h1>Viewer Extension State</h1>
+    <small>
+      This extension shows how an administrator can retrieve or update an individual viewer's state.
+    </small>
+
+    <hr />
+
+    <!--
+      Interface to fetch a specific viewer's extension state.
+    -->
+    <h3>Get Viewer State</h3>
+    <p>Specify a viewer's ID to see their state here:</p>
+
+    <input id="viewer-id" type="text" placeholder="Viewer's Twitch ID" />
+    <button id="lookup-state-btn">Get Viewer State</button>
+
+    <pre id="viewer-state"></pre>
+
+    <hr />
+
+    <!--
+      Interface to set the extension state for one or more viewers.
+    -->
+    <h3>Set Viewer State</h3>
+    <p>Specify one or more viewers' IDs to update their state here:</p>
+
+    <input id="set-viewer-ids" type="text" placeholder="Comma-separated Viewer Twitch ID(s)" />
+    <textarea id="set-viewer-state" rows="10" class="success">{}</textarea>
+
+    <button id="set-state-btn">Set Viewer State</button>
+
+    <small id="set-result"></small>
+
+    <!--
+      JavaScript to drive the UI and extension follows.
+    -->
+    <script type="text/javascript">
+      /*
+       * Here we let the extension know that this page is restricted to admins only.
+       *
+       * If you intend to run this page on your own infrastructure (or even just on your own
+       * machine), you can pass a self-signed JWT to the `opts.jwt()` method. See the Debug page
+       * of the Usage Docs for more information: https://dev.muxy.io/using/debug.html
+       */
+      const opts = new Muxy.DebuggingOptions();
+      opts.role('admin');
+      Muxy.debug(opts);
+
+      Muxy.setup({
+        clientID: 'replaceme'
+      });
+
+      const sdk = new Muxy.SDK();
+
+      /*
+       * Here we bind to the "Lookup" button to retrieve a viewer's extension state.
+       */
+      document.getElementById('lookup-state-btn').addEventListener('click', function() {
+        /*
+         * This function retrieves a viewer's extension state from the server.
+         * Viewer's extension state is keyed off their Opaque ID (which is available for
+         * all viewers). For viewer's who have shared their identity with the extension,
+         * their Opaque ID is simply their Twitch ID prepended with the letter "U".
+         *
+         * See https://dev.twitch.tv/docs/extensions/reference#jwt-schema
+         */
+
+        var id = 'U' + document.getElementById('viewer-id').value;
+        sdk.getExtensionViewerState(id).then(function(response) {
+          document.getElementById('viewer-state').innerText = JSON.stringify(response, null, 2);
+        });
+      });
+
+      /*
+       * Here we bind to the "Set State" button to set each listed viewer's extension state.
+       */
+      document.getElementById('set-state-btn').addEventListener('click', function() {
+        var result = document.getElementById('set-result');
+        result.innerText = 'Setting viewer data...';
+
+        try {
+          /*
+           * `req` will ultimately contain our request payload in the form:
+           * {
+           *   <viewer id>: <state object>,
+           *   <viewer id>: <state object>
+           * }
+           */
+          var req = {};
+
+          var data = JSON.parse(document.getElementById('set-viewer-state').value);
+
+          var ids = document.getElementById('set-viewer-ids').value.trim().split(',');
+          if (ids.length === 0) {
+            result.innerText = 'You must specify at least one viewer ID';
+            return;
+          }
+
+          ids.forEach(function(id) {
+            req['U' + id] = data;
+          });
+
+          /*
+           * Here we call out to the server to set the state. The returned Promise will resolve on
+           * success, or reject with an appropriate error if there was an issue.
+           */
+          sdk.setExtensionStateForViewers(req)
+            .then(function() {
+              result.innerText = '';
+            })
+            .catch(function(err) {
+              console.error(err);
+              result.innerText = err.toString();
+            });
+        } catch (err) {
+          console.error(err);
+          result.innerText = err.toString();
+        }
+      });
+
+      /*
+       * For convenience check the correctness of the entered JSON state data.
+       */
+      document.getElementById('set-viewer-state').addEventListener('input', function() {
+        var el = document.getElementById('set-viewer-state');
+        try {
+          JSON.parse(el.value);
+          el.classList.remove('error');
+          el.classList.add('success');
+        } catch (err) {
+          el.classList.remove('success');
+          el.classList.add('error');
+        }
+      });
+    </script>
+  </body>
+</html>

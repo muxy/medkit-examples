@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Viewer Page</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+    <!--
+      Twitch only allows loading assets from certain white-listed domains. Here we load the latest
+      version of Muxy's JavaScript SDK. You can reference specific versions by replacing `latest`
+      with a version number (e.g. `2.0.0`), or keep this as-is to automatically load the most
+      recent version.
+    -->
+    <script src="//ext-cdn.muxy.io/medkit/latest/medkit.umd.js"></script>
+
+    <!--
+      Here is the entire code block needed to power the extension. It uses Muxy's state loading to
+      get (and periodically update) this viewer's extension state.
+    -->
+    <script type="text/javascript">
+      const opts = new Muxy.DebuggingOptions();
+      opts.role('viewer').channelID('12345');
+      Muxy.debug(opts);
+
+      Muxy.setup({
+        clientID: 'replaceme'
+      });
+      const sdk = new Muxy.SDK();
+      sdk.loaded().then(getExtensionViewerState);
+
+      function getExtensionViewerState() {
+        sdk.getExtensionViewerState()
+          .then(function (resp) {
+            document.getElementById('viewer-state').innerText = JSON.stringify(resp, null, 2);
+          })
+          .catch(function (err) {
+            console.error(err);
+            document.getElementById('update-status').innerText = err.toString();
+          });
+      }
+
+      var updateCountdown = 10;
+      window.setInterval(function () {
+        updateCountdown -= 1;
+        if (updateCountdown === 0) {
+          getExtensionViewerState();
+          updateCountdown = 10;
+        }
+
+        document.getElementById('update-time-remaining').innerText = updateCountdown;
+      }, 1000);
+    </script>
+  </head>
+
+  <body>
+    <h1>Current Viewer's Extension State</h1>
+    <pre id="viewer-state"></pre>
+
+    <small>Updating in <span id="update-time-remaining">10</span> second(s).</small>
+
+    <hr />
+    <small id="update-status"></small>
+  </body>
+</html>
