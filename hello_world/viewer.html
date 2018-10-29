@@ -1,18 +1,23 @@
+<!doctype html>
 <html>
-
   <head>
+    <title>Viewer-Facing Page</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+
     <style>
       @import url('//fonts.googleapis.com/css?family=Roboto');
         body { font-family: 'Roboto', sans-serif; }
-      </style>
+    </style>
 
     <!--
-        Twitch only allows loading assets from certain white-listed domains. Above we reference a font
-        from Google's font CDN. Here we load the latest version of Muxy's JavaScript SDK. You can
-        reference specific versions by replacing `latest` with a version number (e.g. `2.0.0`), or keep
-        this as-is to automatically load the most recent version.
-      -->
-    <script src="//ext-cdn.muxy.io/muxy-extensions-js/latest/muxy-extensions.js"></script>
+      Twitch only allows loading assets from certain white-listed domains. Above we reference a font
+      from Google's font CDN. Here we load the latest version of Muxy's JavaScript SDK. You can
+      reference specific versions by replacing `latest` with a version number (e.g. `2.0.0`), or keep
+      this as-is to automatically load the most recent version.
+    -->
+    <script src="//ext-cdn.muxy.io/medkit/latest/medkit.umd.js"></script>
 
     <!--
       Here is the entire code block needed to power the panel. It uses Muxy's state loading to get
@@ -20,38 +25,49 @@
     -->
     <script type="text/javascript">
       /*
-      * All Muxy-powered extensions begin by initializing the SDK. This is done by simply calling
-      * `setup()` on the global Muxy object with your extension's Client ID, and then creating an
-      * SDK object.
-      */
-      Muxy.setup({ clientID: 'replaceme' });
+       * Here you can set any values to be used when the extension is being debugged. You can safely
+       * leave these calls in, as they will be overridden by the actual information provided in a
+       * production environment. (The channel and user IDs are particularly useful).
+       */
+      const opts = new Muxy.DebuggingOptions();
+      opts.role('viewer').channelID('12345').userID('67890');
+      Muxy.debug(opts);
+
+      /*
+       * All Muxy-powered extensions begin by initializing the SDK. This is done by simply calling
+       * `setup()` on the global Muxy object with your extension's Client ID, and then creating an
+       * SDK object.
+       */
+      Muxy.setup({
+        clientID: 'replaceme'
+      });
       const sdk = new Muxy.SDK();
 
       /*
-      * The new SDK object has a `loaded` function that returns a Promise which will resolve once
-      * communication with the backend has been established. It will fail with an error if
-      * something goes wrong.
-      */
+       * The new SDK object has a `loaded` function that returns a Promise which will resolve once
+       * communication with the backend has been established. It will fail with an error if
+       * something goes wrong.
+       */
       sdk.loaded().then(() => {
         /*
-        * First we will ask the SDK to load all extension state from the backend. This function
-        * returns a Promise that will resolve with an object containing several fields representing
-        * state for everything from the extension as a whole, to the broadcaster-set channel state,
-        * even down to state stored for the specific viewer.
-        */
+         * First we will ask the SDK to load all extension state from the backend. This function
+         * returns a Promise that will resolve with an object containing several fields representing
+         * state for everything from the extension as a whole, to the broadcaster-set channel state,
+         * even down to state stored for the specific viewer.
+         */
         sdk.getAllState().then(function (state) {
           /*
-          * The `channel` field of the `state` object will contain data set by the broadcaster.
-          */
+           * The `channel` field of the `state` object will contain data set by the broadcaster.
+           */
           document.querySelector('#motd').innerText = state.channel.motd || 'Enjoy the show!';
         }).catch(function (err) {
           console.error(err);
         });
 
         /*
-        * Next we will set up an event listener on the SDK that will listen for a named event
-        * coming to the extension.
-        */
+         * Next we will set up an event listener on the SDK that will listen for a named event
+         * coming to the extension.
+         */
         sdk.listen('motd', function (event) {
           document.querySelector('#motd').innerText = event.motd;
         }).catch(function (err) {
@@ -62,12 +78,10 @@
   </head>
 
   <!--
-      Not much markup is needed.
-    -->
-
+    Not much markup is needed.
+  -->
   <body>
     <h3>Message of the Day</h3>
     <p id="motd"></p>
   </body>
-
 </html>

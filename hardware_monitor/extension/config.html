@@ -1,38 +1,45 @@
+<!doctype html>
 <html>
   <head>
+    <title>Broadcaster Config</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+
     <style>
       @import url('//fonts.googleapis.com/css?family=Roboto');
-
       body {
         font-family: 'Roboto', sans-serif;
       }
-
     </style>
+
     <script type="text/javascript">
       /*
-      * Here we are giving the SDK a hint that this will run on the broadcaster's dashboard and
-      * have the same rights a broadcaster does. This is only needed and used when developing an
-      * extension. Once it is deployed to production, the backend will use the correct rights from
-      * the extension system. You can leave this line in and it will not adversely affect the
-      * final extension.
-      */
-      Muxy.testJWTRole = 'broadcaster';
+       * Here we are giving the SDK a hint that this will run on the broadcaster's dashboard and
+       * have the same rights a broadcaster does. This is only needed and used when developing an
+       * extension. Once it is deployed to production, the backend will use the correct rights from
+       * the extension system. You can leave this line in and it will not adversely affect the
+       * final extension.
+       */
+      const opts = new Muxy.DebuggingOptions();
+      opts.role('broadcaster');
+      Muxy.debug(opts);
 
       /*
-      * All Muxy-powered extensions begin by initializing the SDK. This is done by simply calling
-      * `setup()` on the global Muxy object with your extension's Client ID, and then creating an
-      * SDK object.
-      */
-      Muxy.setup({ clientID: 'replaceme' });
+       * All Muxy-powered extensions begin by initializing the SDK. This is done by simply calling
+       * `setup()` on the global Muxy object with your extension's Client ID, and then creating an
+       * SDK object.
+       */
+      Muxy.setup({
+        clientID: 'replaceme'
+      });
       const sdk = new Muxy.SDK();
 
-
-
       /*
-      * Here we attach an event listener for the click of the button that validates the user input broadcaster
-      * PIN (here called "Auth Code") with Muxy's Two-Factor auth system and displays the appropriate message
-      * to the user based on the validation response.
-      */
+       * Here we attach an event listener for the click of the button that validates the user input broadcaster
+       * PIN (here called "Auth Code") with Muxy's Two-Factor auth system and displays the appropriate message
+       * to the user based on the validation response.
+       */
       document.querySelector('#validate').addEventListener('click', () => {
         const codeEl = document.querySelector('#code');
         const statusEl = document.querySelector('#status');
@@ -50,13 +57,14 @@
 
   <body>
     <label>
-      Auth Code
-      <br />
+      Auth Code <br />
       <input id="code" type="text">
     </label>
     <br />
+
     <button id="validate">Validate</button>
     <br />
+
     <span id="status"></span>
   </body>
 </html>

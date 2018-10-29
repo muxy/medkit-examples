@@ -1,59 +1,67 @@
+<!doctype html>
 <html>
-<head>
-  <script src="https://extension-files.twitch.tv/helper/v1/twitch-ext.min.js"></script>
+  <head>
+    <title>Panel Extension</title>
 
-  <!--
-    Twitch only allows loading assets from certain white-listed domains.
-    Here we load the latest version of Muxy's JavaScript SDK. You can
-    reference specific versions by replacing `latest` with a version number (e.g. `2.0.0`), or keep
-    this as-is to automatically load the most recent version.
-  -->
-  <script src="https://ext-cdn.muxy.io/muxy-extensions-js/latest/muxy-extensions.js"></script>
-</head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-<body>
-  <h1>Latest Soundcloud Like</h1>
-  <a id="trackLink">
-    <h3 id="trackTitle"></h3>
-    <img id="trackImage"/>
-  </a>
+    <script src="//extension-files.twitch.tv/helper/v1/twitch-ext.min.js"></script>
 
-  <script type="text/javascript">
-    Muxy.testChannelID = ''; // set this to the channel you want to test on
+    <!--
+      Twitch only allows loading assets from certain white-listed domains.
+      Here we load the latest version of Muxy's JavaScript SDK. You can
+      reference specific versions by replacing `latest` with a version number (e.g. `2.0.0`), or keep
+      this as-is to automatically load the most recent version.
+    -->
+    <script src="//ext-cdn.muxy.io/medkit/latest/medkit.umd.js"></script>
+  </head>
 
-    Muxy.setup({
-      clientID: '' // Fill in your extension client ID here
-    });
-    const sdk = new Muxy.SDK();
+  <body>
+    <h1>Latest Soundcloud Like</h1>
+    <a id="trackLink">
+      <h3 id="trackTitle"></h3>
+      <img id="trackImage" />
+    </a>
 
-    // Wait for the SDK to load it's configuration
-    sdk.loaded()
-      .then(() => {
-        // Fetch data that may already be stored about the track
-        sdk.getJSONStore('track_info')
-          .then(data => {
-            setTrackInfo(data);
-          })
-          .catch(() => {
-            console.log("Failed to fetch track info");
-          });
+    <script type="text/javascript">
+      const opts = new Muxy.DebuggingOptions();
+      opts.role('viewer').channelID(''); // set this to the channel you want to test on
+      Muxy.debug(opts);
 
-        // Listen for updates to track info
-        sdk.listen('json_store_update:track_info', (data) => {
-          // data.id will equal track_info
-          setTrackInfo(data.value);
-        });
+      Muxy.setup({
+        clientID: '' // Fill in your extension client ID here
       });
+      const sdk = new Muxy.SDK();
 
-    const setTrackInfo = data => {
-      if (data.trackInfo) {
-        // Update the elements with the track info
-        document.querySelector('#trackLink').setAttribute('href', data.trackInfo.link);
-        document.querySelector('#trackTitle').textContent = data.trackInfo.title;
-        document.querySelector('#trackImage').setAttribute('src', data.trackInfo.image);
-      }
-    };
+      // Wait for the SDK to load it's configuration
+      sdk.loaded()
+        .then(() => {
+          // Fetch data that may already be stored about the track
+          sdk.getJSONStore('track_info')
+            .then(data => {
+              setTrackInfo(data);
+            })
+            .catch(() => {
+              console.log("Failed to fetch track info");
+            });
 
-  </script>
-</body>
+          // Listen for updates to track info
+          sdk.listen('json_store_update:track_info', (data) => {
+            // data.id will equal track_info
+            setTrackInfo(data.value);
+          });
+        });
+
+      const setTrackInfo = data => {
+        if (data.trackInfo) {
+          // Update the elements with the track info
+          document.querySelector('#trackLink').setAttribute('href', data.trackInfo.link);
+          document.querySelector('#trackTitle').textContent = data.trackInfo.title;
+          document.querySelector('#trackImage').setAttribute('src', data.trackInfo.image);
+        }
+      };
+    </script>
+  </body>
 </html>

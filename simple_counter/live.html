@@ -1,5 +1,10 @@
+<!doctype html>
 <html>
   <head>
+    <title>Broadcaster Live Dashboard</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
     <!-- A real extension would not be able to link to external CDNs; we just do it here for simplicity -->
     <script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
@@ -10,7 +15,7 @@
       reference specific versions by replacing `latest` with a version number (e.g. `2.0.0`), or keep
       this as-is to automatically load the most recent version.
     -->
-    <script src="//ext-cdn.muxy.io/muxy-extensions-js/latest/muxy-extensions-js.js"></script>
+    <script src="//ext-cdn.muxy.io/medkit/latest/medkit.umd.js"></script>
 
     <!--
       Here is the entire code block needed to power the panel. It uses Muxy's state loading to get
@@ -18,23 +23,27 @@
     -->
     <script type="text/javascript">
       /*
-      * Here we are giving the SDK a hint that this will run on the broadcaster's dashboard and
-      * have the same rights a broadcaster does. This is only needed and used when developing an
-      * extension. Once it is deployed to production, the backend will use the correct rights from
-      * the extension system. You can leave this line in and it will not adversely affect the
-      * final extension.
-      */
-      Muxy.testJWTRole = 'broadcaster';
+       * Here we are giving the SDK a hint that this will run on the broadcaster's dashboard and
+       * have the same rights a broadcaster does. This is only needed and used when developing an
+       * extension. Once it is deployed to production, the backend will use the correct rights from
+       * the extension system. You can leave this line in and it will not adversely affect the
+       * final extension.
+       */
+      const opts = new Muxy.DebuggingOptions();
+      opts.role('broadcaster');
+      Muxy.debug(opts);
 
-      Muxy.setup({ clientID: 'replaceme' });
+      Muxy.setup({
+        clientID: 'replaceme'
+      });
       const sdk = new Muxy.SDK();
 
       var firstFetchTime;
 
       /*
-      * Here we are using lodash to throttles calls to this function, so if it is called more than once in a short period of
-      * time, only one instance will be called.
-      */
+       * Here we are using lodash to throttles calls to this function, so if it is called more than once in a short period of
+       * time, only one instance will be called.
+       */
       const updateCount = _.debounce(function () {
         // We'll be counting the number of accumulations since the initial fetch
         if (!firstFetchTime) {

@@ -1,53 +1,64 @@
+<!doctype html>
 <html>
-
   <head>
+    <title>Broadcaster Live Dashboard</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+
     <!-- We load and initialize the Muxy SDK in the same way as on the panel. -->
-    <script src="//ext-cdn.muxy.io/muxy-extensions-js/latest/muxy-extensions-js.js"></script>
+    <script src="//ext-cdn.muxy.io/medkit/latest/medkit.umd.js"></script>
 
     <script type="text/javascript">
       /*
-      * Here we are giving the SDK a hint that this will run on the broadcaster's dashboard and
-      * have the same rights a broadcaster does. This is only needed and used when developing an
-      * extension. Once it is deployed to production, the backend will use the correct rights from
-      * the extension system. You can leave this line in and it will not adversely affect the
-      * final extension.
-      */
-      Muxy.testJWTRole = 'broadcaster';
+       * Here we are giving the SDK a hint that this will run on the broadcaster's dashboard and
+       * have the same rights a broadcaster does. This is only needed and used when developing an
+       * extension. Once it is deployed to production, the backend will use the correct rights from
+       * the extension system. You can leave this line in and it will not adversely affect the
+       * final extension.
+       */
+      const opts = new Muxy.DebuggingOptions();
+      opts.role('broadcaster');
+      Muxy.debug(opts);
 
-      Muxy.setup({ clientID: 'replaceme' });
+      Muxy.setup({
+        clientID: 'replaceme'
+      });
       const sdk = new Muxy.SDK();
 
       function changeMotd() {
         const motd = document.querySelector('#motd').value;
 
         /*
-        * We wait for the SDK to confirm it is loaded each time the button is clicked. In a real
-        * extension you may want a more robust solution, although there is no harm in calling
-        * this function multiple times.
-        */
+         * We wait for the SDK to confirm it is loaded each time the button is clicked. In a real
+         * extension you may want a more robust solution, although there is no harm in calling
+         * this function multiple times.
+         */
         sdk.loaded().then(() => {
           /*
-          * First we send the updated message state to the backend. This ensures that future
-          * requests to get the extension state will have the most recent message.
-          */
+           * First we send the updated message state to the backend. This ensures that future
+           * requests to get the extension state will have the most recent message.
+           */
           sdk.setChannelState({
             motd: motd
           });
 
           /*
-          * Then we broadcast an event to all current viewers with the new message. This will
-          * allow the panel extension to update its message without continuously polling
-          * the backend.
-          */
-          sdk.send('motd', { motd: motd });
+           * Then we broadcast an event to all current viewers with the new message. This will
+           * allow the panel extension to update its message without continuously polling
+           * the backend.
+           */
+          sdk.send('motd', {
+            motd: motd
+          });
         });
       }
     </script>
   </head>
 
   <!--
-      Not much markup is needed.
-    -->
+    Not much markup is needed.
+  -->
 
   <body>
     <textarea id="motd">Hello, world!</textarea>
@@ -55,5 +66,4 @@
       <button onclick="changeMotd()">Set MOTD</button>
     </p>
   </body>
-
 </html>

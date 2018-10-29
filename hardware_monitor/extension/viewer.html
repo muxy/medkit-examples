@@ -1,5 +1,11 @@
+<!doctype html>
 <html>
   <head>
+    <title>Viewer-Facing Extension</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+
     <style>
       @import url('//fonts.googleapis.com/css?family=Roboto');
 
@@ -24,49 +30,51 @@
 
     <script type="text/javascript">
       /*
-        * All Muxy-powered extensions begin by initializing the SDK. This is done by simply calling
-        * `setup()` on the global Muxy object with your extension's Client ID, and then creating an
-        * SDK object.
-        */
-        Muxy.setup({ clientID: 'replaceme' });
-        const sdk = new Muxy.SDK();
+       * All Muxy-powered extensions begin by initializing the SDK. This is done by simply calling
+       * `setup()` on the global Muxy object with your extension's Client ID, and then creating an
+       * SDK object.
+       */
+      Muxy.setup({
+        clientID: 'replaceme'
+      });
+      const sdk = new Muxy.SDK();
+
+      /*
+       * The new SDK object has a `loaded` function that returns a Promise which will resolve once
+       * communication with the backend has been established. It will fail with an error if
+       * something goes wrong.
+       */
+      sdk.loaded().then(() => {
+        /*
+         * First we will ask the SDK to load all extension state from the backend. This function
+         * returns a Promise that will resolve with an object containing several fields representing
+         * state for everything from the extension as a whole, to the broadcaster-set channel state,
+         * even down to state stored for the specific viewer.
+         */
+        sdk.getAllState().then(function (state) {
+          /*
+           * The `channel` field of the `state` object will contain data set by the broadcaster.
+           */
+          document.querySelector('#CPU').style.width = `${state.channel.CPU}%` || '0%';
+          document.querySelector('#RAM').style.width = `${state.channel.RAM}%` || '0%';
+        }).catch(function (err) {
+          console.error(err);
+        });
 
         /*
-        * The new SDK object has a `loaded` function that returns a Promise which will resolve once
-        * communication with the backend has been established. It will fail with an error if
-        * something goes wrong.
-        */
-        sdk.loaded().then(() => {
-          /*
-          * First we will ask the SDK to load all extension state from the backend. This function
-          * returns a Promise that will resolve with an object containing several fields representing
-          * state for everything from the extension as a whole, to the broadcaster-set channel state,
-          * even down to state stored for the specific viewer.
-          */
-          sdk.getAllState().then(function (state) {
-            /*
-            * The `channel` field of the `state` object will contain data set by the broadcaster.
-            */
-            document.querySelector('#CPU').style.width = `${state.channel.CPU}%` || '0%';
-            document.querySelector('#RAM').style.width = `${state.channel.RAM}%` || '0%';
-          }).catch(function (err) {
-            console.error(err);
-          });
-
-          /*
-          * Next we will set up an event listener on the SDK that will listen for a named event
-          * coming to the extension.
-          */
-          sdk.listen('json_store_update:hardware_stats', (data) => {
-            // Timeout allows for viewer latency to synchronize stats and video
-            setTimeout(() => { 
-              document.querySelector('#CPU').style.width = `${data.value.CPU}%`;
-              document.querySelector('#RAM').style.width = `${data.value.RAM}%`;
-            }, (sdk.user.latency || 0) * 1000);
-          }).catch(function (err) {
-            console.error(err);
-          });
+         * Next we will set up an event listener on the SDK that will listen for a named event
+         * coming to the extension.
+         */
+        sdk.listen('json_store_update:hardware_stats', (data) => {
+          // Timeout allows for viewer latency to synchronize stats and video
+          setTimeout(() => {
+            document.querySelector('#CPU').style.width = `${data.value.CPU}%`;
+            document.querySelector('#RAM').style.width = `${data.value.RAM}%`;
+          }, (sdk.user.latency || 0) * 1000);
+        }).catch(function (err) {
+          console.error(err);
         });
+      });
     </script>
   </head>
 
