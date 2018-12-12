@@ -18,11 +18,7 @@ const channelID = "";
  *                     More info: https://expressjs.com/en/api.html#res
  */
 exports.helloPOST = (req, res) => {
-  sendData(req.body);
-};
-
-sendData = data => {
-  // We need to decode the base64 encoded secret to use it to sign the JWT
+    // We need to decode the base64 encoded secret to use it to sign the JWT
   const decodedSecret = Buffer.from(extensionSecret, 'base64');
 
   // Create a minimally viable JWT
@@ -49,11 +45,13 @@ sendData = data => {
     resp.on("data", function(chunk) {
       console.log("BODY: " + chunk);
     });
+
+    res.sendStatus(200);
   });
 
   // Write the data we got from IFTTT into the json store request
   postRequest.write(JSON.stringify({
-    trackInfo: data
+    trackInfo: req.body
   }));
   postRequest.end();
 };
