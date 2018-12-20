@@ -15,6 +15,8 @@ Google cloud functions have other triggers that might be useful too. Eg. use cro
 it to the Muxy API.
 
 ### Setup
+Enter your extension's Info inside the developer portal 
+https://dev.muxy.io/app#/dashboard
 
 Update the config strings in cloud/index.js
 
@@ -25,7 +27,9 @@ Update the config strings in extension/panel.html
 Setup your google cloud account and auth locally
 https://cloud.google.com/functions/docs/quickstart
 
-Deploy the google cloud function
+Note: If you can not use the gcloud function in the terminal, make sure your $PATH is set up correctly.
+
+Deploy the google cloud function inside the google cloud function example.
 ```
 cd ./cloud
 gcloud functions deploy helloPOST --runtime nodejs6 --trigger-http
