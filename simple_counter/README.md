@@ -1,5 +1,6 @@
 Simple Counter
 -------------
+Make sure to add your extension to the [Dev Portal](https://dev.muxy.io)
 
 In the viewer.html and live.html files find the string called 'replaceme' and replace it with your extension client ID.
 
