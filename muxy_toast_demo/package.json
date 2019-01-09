@@ -1,0 +1,25 @@
+{
+  "name": "muxy_toast_demo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^3.0.4",
+    "@vue/cli-service": "^3.0.4",
+    "dotenv-webpack": "^1.6.0",
+    "node-sass": "^4.11.0",
+    "sass-loader": "^7.1.0",
+    "vue-template-compiler": "^2.5.22"
+  },
+  "dependencies": {
+    "@muxy/extensions-js": "^2.2.4",
+    "spectre.css": "^0.5.8",
+    "vue": "^2.5.21"
+  }
+}
