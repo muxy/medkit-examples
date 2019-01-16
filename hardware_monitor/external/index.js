@@ -69,6 +69,7 @@ const checkJWT = ()=> {
     json: true
   })
   .then(() => {
+    console.log('PIN validated successfully. Sending stats to viewers');
     // Start getting PC stats
     startPollingStats();
   })
@@ -82,7 +83,7 @@ const postLoadInfo = (info) => {
   // Send the PC stats to the json_store
   rp({
     method: 'POST',
-    uri: 'https://sandbox.api.muxy.io/v1/e/json_store?id=default',
+    uri: 'https://sandbox.api.muxy.io/v1/e/json_store?id=hardware_stats',
     headers: {
       Authorization: `${process.env.EXTENSION_ID} ${token}`
     },
