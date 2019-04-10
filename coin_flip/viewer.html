@@ -1,0 +1,126 @@
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <!-- Here we reference the stylesheet for CSS. -->
+    <link rel= "stylesheet" type = "text/css" href = "./Coinflipstyle.css">
+    <!--
+      Here we load the latest version of Muxy"s JavaScript SDK. You can
+      reference specific versions by replacing `latest` with a version number (e.g. `2.0.0`), or keep
+      this as-is to automatically load the most recent version.
+    -->
+    <script src="https://ext-cdn.muxy.io/medkit/latest/medkit.umd.js"></script>
+
+    <!--
+      Here is the entire code block used to power the panel. Here is where a we take the viewers guess and determine if it is correct
+      and send this information back to the brodcaster.
+    -->
+    <script type="text/javascript">
+    
+      /*
+      * Here we are giving the SDK a hint that this will run on the broadcaster"s dashboard and
+      * have the same rights a broadcaster does. This is only needed and used when developing an
+      * extension. Once it is deployed to production, the backend will use the correct rights from
+      * the extension system. You can leave this line in and it will not adversely affect the
+      * final extension.
+      */
+      const options = new Muxy.DebuggingOptions();
+      options.role('viewer');
+      Muxy.debug(options);
+      Muxy.setup({ clientID: "replaceme" });
+      const sdk = new Muxy.SDK();
+
+
+      
+      let choice = null;
+      window.determineWinner = function() {
+        var choicesQuery = document.querySelector("#choices");
+        var resultsQuery = document.querySelector("#results");
+        // Generating random number to determine if heads or tails.
+        var randomNumber = Math.round(Math.random());
+        // Here we determine whether or not your choice matches the correct answer.
+        if (randomNumber == choice) {
+          resultsQuery.innerText = "You guessed right, Winner!";
+          sdk.rank("WinLose", "win");
+        } else {
+          resultsQuery.innerText = "You guessed wrong, Loser!";
+          sdk.rank("WinLose", "lose");
+        }
+        // Here we determine if you are a winner or loser and display it back to you.
+        if (choice == 1) {
+          choicesQuery.innerText = "You picked Heads!";
+        } else {
+          choicesQuery.innerText = "You picked Tails!";
+        }
+        // This is where we make them disappear.
+        document.querySelector("#results").style.opacity = 1;
+        document.querySelector("#choices").style.opacity = 1;
+      };
+      // The Dom Loader waits for the browser to fully load the HTML and javascript, but not CSS.
+      window.addEventListener("DOMContentLoaded", function(){ 
+        // This makes sure that Muxy's SDK is fully loaded until executing the following code.
+        sdk.loaded().then(() => { 
+
+          document.querySelector('#tails').disabled = true;
+          document.querySelector('#heads').disabled = true;
+
+          // Here is where we listen to see if you click on the heads button.
+          document.querySelector("#heads").addEventListener("click", function(){
+
+            if (choice != null) return;
+              choice = 1;
+              document.querySelector("#text").style.opacity = 0;
+              document.querySelector("#heads").style.opacity = 0;
+              document.querySelector("#tails").style.opacity = 0;
+              determineWinner();
+            });
+
+            // Here is where we listen to see if you click on the tails button.
+          document.querySelector("#tails").addEventListener("click", function(){
+
+            if (choice != null) return;
+              choice = 0;
+              document.querySelector("#text").style.opacity = 0;
+              document.querySelector("#heads").style.opacity = 0;
+              document.querySelector("#tails").style.opacity = 0;
+              determineWinner();
+            });
+
+
+          sdk.listen("start",function(event){
+            choice = null;
+            // Here is where we show and hide buttons/text due to the start button being clicked on the live.html.
+            document.querySelector('#tails').disabled = false;
+            document.querySelector('#heads').disabled = false;
+            document.querySelector("#starttext").innerHTML = "Game Started."
+            document.querySelector("#text").style.opacity = 1;
+            document.querySelector("#heads").style.opacity = 1;
+            document.querySelector("#tails").style.opacity = 1;
+            document.querySelector("#starttext").style.opacity = 0;
+           });
+     
+          sdk.listen("end",function(event){
+            //Here is where we show/hide certian text and buttons.
+            document.querySelector("#choices").innerHTML = "";
+            document.querySelector("#results").innerHTML = "";
+            document.querySelector("#text").style.opacity = 0;
+            document.querySelector("#heads").style.opacity = 0;
+            document.querySelector("#tails").style.opacity = 0;
+            document.querySelector("#starttext").style.opacity = 1;
+            document.querySelector("#starttext").innerHTML = "Game over.";
+          });
+        });
+      });
+      </script>
+  </head>
+  <body>
+    <p id="text">Click a button to guess what the result is.</p>
+    <p id="results"></p>
+    <p id="choices"></p>
+    
+    <div id="buttons">
+      <button id="heads">Heads</button>
+      <button id="tails">Tails</button>
+      <p id="startText">Wait for the broadcaster to start the coin flip.</p>
+    </div>
+ </body>
+</html>

@@ -1,0 +1,73 @@
+<html>
+  <head>
+    <meta charset="UTF-8">
+
+    <link rel= "stylesheet" type = "text/css" href = "./Coinflipstyle.css">
+    <!--
+      Here we load the latest version of Muxy"s JavaScript SDK. You can
+      reference specific versions by replacing `latest` with a version number (e.g. `2.0.0`), or keep
+      this as-is to automatically load the most recent version.
+    -->
+    <script src="https://ext-cdn.muxy.io/medkit/latest/medkit.umd.js"></script>
+
+    <!--
+      Here is the entire code block needed to power the panel. This uses Muxy's ranking to aggregate
+      viewers data and display it back to the broadcaster.
+    -->
+    <script type="text/javascript">
+
+      /*
+      * Here we are giving the SDK a hint that this will run on the broadcaster"s dashboard and
+      * have the same rights a broadcaster does. This is only needed and used when developing an
+      * extension. Once it is deployed to production, the backend will use the correct rights from
+      * the extension system. You can leave this line in and it will not adversely affect the
+      * final extension.
+      */
+
+      const options = new Muxy.DebuggingOptions();
+      options.role('broadcaster');
+      Muxy.debug(options);
+      Muxy.setup({clientID: 'replaceme' });
+      const sdk = new Muxy.SDK();
+
+      function getData() {
+        document.querySelector("#results").style.opacity = 1;
+
+        // arrayx is just a variable name that refers to the ranking data being sent to the broadcaster.
+        sdk.getRankingData("WinLose").then(function(arrayx) {
+          // The Muxy SDK is returning the viewer data and printing it out inside the console.
+          console.log(arrayx);
+          var winners = arrayx.find(function(win) { return win.key === "win" });
+          var losers = arrayx.find(function(lose) { return lose.key === "lose" });
+          // Displaying the number of winner and losers.
+          document.querySelector("#results").innerText = "Winners: " + winners.score + "\n Losers: " + losers.score;
+        });
+      }
+
+      var dataTimer;
+      // Here is the function that will run when the "Start game" button is clicked.
+      function startGame() {
+        sdk.send("start");
+        document.querySelector("#status").innerText = "Game started";
+        dataTimer = setInterval(getData,1000);
+      }
+
+      // Here is the function that will run when the "End game" button is clicked.
+      function endGame() {
+        // The clear interval fucntion stops the dataTimer.
+        clearInterval(dataTimer);
+        document.querySelector("#status").innerText = "Game ended";
+        sdk.send("end");
+      }
+      </script>
+  </head>
+  <body>
+    <p id="text2">Click start to allow viewers to start guessing the coin flip.</p>
+    <p id="results"></p>
+    <p id="status"></p>
+    <button id="startbutton" onclick="startGame()">
+      Start game
+    </button>
+    <button id="endbutton" onclick="endGame()">End game</button>
+  </body>
+ </html>
