@@ -1,0 +1,85 @@
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <!-- A real extension would not be able to link to external CDNs; we just do it here for simplicity -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
+
+    <!--
+      Twitch only allows loading assets from certain white-listed domains. Above we reference a font
+      from Google's font CDN. Here we load the latest version of Muxy's JavaScript SDK. You can
+      reference specific versions by replacing `latest` with a version number (e.g. `2.0.0`), or keep
+      this as-is to automatically load the most recent version.
+    -->
+    <script src="https://ext-cdn.muxy.io/medkit/latest/medkit.umd.js"></script>
+
+    <!--
+      Here is the entire code block needed to power the panel. It uses Muxy's state loading to get
+      the last sent message, and easy event binding to get notified when a new message is sent.
+    -->
+    <script type="text/javascript">
+      /*
+      * Here we are giving the SDK a hint that this will run on the broadcaster's dashboard and
+      * have the same rights a broadcaster does. This is only needed and used when developing an
+      * extension. Once it is deployed to production, the backend will use the correct rights from
+      * the extension system. You can leave this line in and it will not adversely affect the
+      * final extension.
+      */
+      Muxy.testJWTRole = 'broadcaster';
+
+      Muxy.setup({ clientID: 'replaceme' });
+      const sdk = new Muxy.SDK();
+
+      /*
+       * Here we are using lodash to throttles calls to this function, so if it is called more than once in a short period of
+       * time, only one instance will be called.
+       */
+      const vote = _.debounce(function (candidate) {
+        // Send a vote for the candidate
+        // https://dev.muxy.io/using/aggregation-methods/vote.html#sending-votes
+        sdk.vote('example_poll', candidate).then((data) => {
+          console.log('Voted; returned data:');
+          console.log(data);
+
+          // Update UI with returned vote data
+          for (i = 1; i <=3; i++) {
+            document.querySelector('#count' + i).innerText = data.specific[i];
+          }
+
+          document.querySelector('#total').innerText = data.count;
+        });
+      }, 250);
+
+      window.addEventListener('DOMContentLoaded', function() {
+        // Fetch the current poll results
+        // https://dev.muxy.io/using/aggregation-methods/vote.html#getting-votes
+        sdk.getVoteData('example_poll').then((voteData) => {
+          console.log('Initial vote data:');
+          console.log(voteData);
+        });
+
+        document.querySelector('#vote1').addEventListener('click', () => {vote(1);});
+        document.querySelector('#vote2').addEventListener('click', () => {vote(2);});
+        document.querySelector('#vote3').addEventListener('click', () => {vote(3);});
+      });
+
+      sdk.loaded().then(() => {
+        // Listen for poll updates
+        // https://dev.muxy.io/using/aggregation-methods/vote.html#automatic-vote-updates
+        sdk.listen('vote_update:example_poll', (voteData) => {
+          console.log('Received vote data:');
+          console.log(voteData);
+        });
+      });
+    </script>
+  </head>
+
+  <body>
+    <p>Press a button to vote for 1, 2, or 3</p>
+
+    <button id="vote1">Vote for 1</button> <span id="count1">0</span><br/>
+    <button id="vote2">Vote for 2</button> <span id="count2">0</span><br/>
+    <button id="vote3">Vote for 3</button> <span id="count3">0</span><br/>
+
+    <p>Total votes: <span id="total">0</span></p>
+  </body>
+</html>
