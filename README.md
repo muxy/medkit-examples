@@ -8,7 +8,7 @@ Provide simple HTML/JavaScript extension examples that demonstrate the instantia
 
 ## API Reference
 
-[Muxy Extension JavaScript Library](https://dev.muxy.io/javascript/index.html)
+[Getting Started with MEDKit](https://docs.muxy.io/docs/getting-started-with-medkit)
 
 ## How to Use
 
